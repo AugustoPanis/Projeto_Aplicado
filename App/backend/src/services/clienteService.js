@@ -72,8 +72,6 @@ const testarConexao = async (id) => {
     if (!enviado) {
         throw new Error('App offline ou não conectado');
     }
-
-    return { sucesso: true, mensagem: 'Mensagem enviada para o app!' };
 };
 
 module.exports = {

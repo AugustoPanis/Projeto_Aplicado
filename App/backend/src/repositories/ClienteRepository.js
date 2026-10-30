@@ -6,6 +6,11 @@ const create = async (data) => {
     return await cliente.save();
 };
 
+// No repository:
+const findOne = async (tokenApp) => {
+    return await Cliente.findOne({ tokenApp: tokenApp });   // Ou apenas { tokenApp }
+};
+
 const getAll = async () => {
     return await Cliente.find();
 }
@@ -34,5 +39,6 @@ module.exports = {
     getId,
     findByEmail,
     update,
-    deleteCliente
+    deleteCliente,
+    findOne
 };

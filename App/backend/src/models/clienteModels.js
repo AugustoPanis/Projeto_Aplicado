@@ -1,4 +1,4 @@
-const mongoose  = require('mongoose');
+const mongoose = require('mongoose');
 
 const clienteSchema = new mongoose.Schema({
     nome: {
@@ -16,6 +16,11 @@ const clienteSchema = new mongoose.Schema({
         type: String,
         unique: true,
         trim: true,
+    },
+    role: {
+        type: String,
+        enum: ['user', 'adm'],
+        default: 'user'
     }
 });
 
