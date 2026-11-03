@@ -1,5 +1,6 @@
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 const clienteRepository = require('../repositories/ClienteRepository');
-
 const crypto = require('crypto');
 
 const validateEmailCriacao = async (email) => {
@@ -29,14 +30,38 @@ const validaCliente = async (id) => {
 }
 
 const criar = async (dados) => {
+  if (dados.role === 'operador') {
+    if (!dados.senha) throw new Error('Senha obrigatória para operador');
+    dados.senha = await bcrypt.hash(dados.senha, 10);
+  }
+  
+  const novoUsuario = await Cliente.create(dados);
+  return novoUsuario;
+};
 
-    await validateEmailCriacao(dados.email);
+const login = async (cpf, senha) => {
+  const usuario = await Cliente.findOne({ cpf });
+  
+  if (!usuario) {
+    throw new Error('Usuário não encontrado');
+  }
 
-    const tokenApp = crypto.randomUUID();
+  if (usuario.role === 'operador') {
+    if (!senha) throw new Error('Senha é obrigatória para operadores');
+    
+    const senhaValida = await bcrypt.compare(senha, usuario.senha);
+    if (!senhaValida) {
+      throw new Error('Credenciais inválidas');
+    }
+  }
 
-    const cliente = await clienteRepository.create({ ...dados, tokenApp });
+  const token = jwt.sign(
+    { id: usuario._id, role: usuario.role },
+    process.env.JWT_SECRET,
+    { expiresIn: '1d' }
+  );
 
-    return cliente;
+  return { token, usuario: { id: usuario._id, nome: usuario.nome, role: usuario.role } };
 };
 
 const getAll = async () => {
@@ -80,5 +105,6 @@ module.exports = {
     getId,
     update,
     deletarCliente,
-    testarConexao
+    testarConexao,
+    login
 };

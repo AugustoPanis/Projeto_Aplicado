@@ -1,4 +1,5 @@
-const Cliente = require('../repositories/ClienteRepository'); // ou o seu repository
+const Cliente = require('../repositories/ClienteRepository');
+const jwt = require('jsonwebtoken');
 
 const authMiddleware = async (req, res, next) => {
     try {
@@ -11,8 +12,7 @@ const authMiddleware = async (req, res, next) => {
         const [, tokenApp] = authHeader.split(' ');
         console.log("TOKEN RECEBIDO DO POSTMAN:", `"${tokenApp}"`)
 
-        // No middleware:
-const cliente = await Cliente.findOne(tokenApp); // Passando a string direto
+        const cliente = await Cliente.findOne(tokenApp); // Passando a string direto
 
         if (!cliente) {
             return res.status(401).json({ error: 'Token inválido ou acesso revogado.' });

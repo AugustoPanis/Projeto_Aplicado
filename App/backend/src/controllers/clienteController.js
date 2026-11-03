@@ -27,6 +27,16 @@ const criar = async (req, res) => {
     }
 };
 
+const login = async (req, res) => {
+  try {
+    const { cpf, senha } = req.body; // 'senha' pode vir undefined para clientes
+    const resultado = await clienteService.login(cpf, senha);
+    return res.status(200).json(resultado);
+  } catch (error) {
+    return res.status(401).json({ erro: error.message });
+  }
+};
+
 const update = async (req, res) => {
     try {
         const cliente = await clienteService.update(req.params.id, req.body);
