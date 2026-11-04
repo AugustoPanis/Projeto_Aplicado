@@ -29,7 +29,7 @@ const criar = async (req, res) => {
 
 const login = async (req, res) => {
   try {
-    const { cpf, senha } = req.body; // 'senha' pode vir undefined para clientes
+    const { cpf, senha } = req.body; 
     const resultado = await clienteService.login(cpf, senha);
     return res.status(200).json(resultado);
   } catch (error) {
@@ -70,5 +70,6 @@ module.exports = {
     criar,
     update,
     deletarCliente,
-    testarConexao
+    testarConexao,
+    login
 };

@@ -6,9 +6,8 @@ const create = async (data) => {
     return await cliente.save();
 };
 
-// No repository:
-const findOne = async (tokenApp) => {
-    return await Cliente.findOne({ tokenApp: tokenApp });   // Ou apenas { tokenApp }
+const findByCpf = async (cpf) => {
+    return await Cliente.findOne({ cpf });   
 };
 
 const getAll = async () => {
@@ -17,11 +16,11 @@ const getAll = async () => {
 
 const getId = async (id) => {
     return await Cliente.findById(id);
-}
+};
 
 const findByEmail = async (email) => {
     return await Cliente.findOne({ email });
-}
+};
 
 const update = async (id, data) => {
     const cliente = await Cliente.findById(id);
@@ -40,5 +39,5 @@ module.exports = {
     findByEmail,
     update,
     deleteCliente,
-    findOne
+    findByCpf
 };

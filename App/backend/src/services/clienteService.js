@@ -3,15 +3,8 @@ const jwt = require('jsonwebtoken');
 const clienteRepository = require('../repositories/ClienteRepository');
 const crypto = require('crypto');
 
-const validateEmailCriacao = async (email) => {
-    const emailExistente = await clienteRepository.findByEmail(email);
 
-    if (emailExistente) {
-        throw new Error("E-mail já cadastrado");
-    }
-}
-
-const validateEmailAtualizacao = async (email, id) => {
+const validaEmail = async (email, id) => {
     const emailExistente = await clienteRepository.findByEmail(email);
 
     if (emailExistente && emailExistente._id.toString() !== id) {
@@ -30,38 +23,42 @@ const validaCliente = async (id) => {
 }
 
 const criar = async (dados) => {
-  if (dados.role === 'operador') {
-    if (!dados.senha) throw new Error('Senha obrigatória para operador');
-    dados.senha = await bcrypt.hash(dados.senha, 10);
-  }
-  
-  const novoUsuario = await Cliente.create(dados);
-  return novoUsuario;
+
+    await validaEmail(dados.email)
+
+    if (dados.role === 'operador') {
+        if (!dados.senha) throw new Error('Senha obrigatória para operador');
+        dados.senha = await bcrypt.hash(dados.senha, 10);
+    }
+
+    const novoUsuario = await clienteRepository.create(dados);
+    return novoUsuario;
 };
 
 const login = async (cpf, senha) => {
-  const usuario = await Cliente.findOne({ cpf });
-  
-  if (!usuario) {
-    throw new Error('Usuário não encontrado');
-  }
 
-  if (usuario.role === 'operador') {
-    if (!senha) throw new Error('Senha é obrigatória para operadores');
-    
-    const senhaValida = await bcrypt.compare(senha, usuario.senha);
-    if (!senhaValida) {
-      throw new Error('Credenciais inválidas');
+    const usuario = await clienteRepository.findByCpf(cpf);
+
+    if (!usuario) {
+        throw new Error('Usuário não encontrado');
     }
-  }
 
-  const token = jwt.sign(
-    { id: usuario._id, role: usuario.role },
-    process.env.JWT_SECRET,
-    { expiresIn: '1d' }
-  );
+    if (usuario.role === 'operador') {
+        if (!senha) throw new Error('Senha é obrigatória para operadores');
 
-  return { token, usuario: { id: usuario._id, nome: usuario.nome, role: usuario.role } };
+        const senhaValida = await bcrypt.compare(senha, usuario.senha);
+        if (!senhaValida) {
+            throw new Error('Credenciais inválidas');
+        }
+    }
+
+    const token = jwt.sign(
+        { id: usuario._id, role: usuario.role },
+        process.env.JWT_SECRET,
+        { expiresIn: '1d' }
+    );
+
+    return { token, usuario: { id: usuario._id, nome: usuario.nome, role: usuario.role } };
 };
 
 const getAll = async () => {
@@ -70,13 +67,13 @@ const getAll = async () => {
 
 const getId = async (id) => {
     return await clienteRepository.getId(id);
-} 
+}
 
 const update = async (id, dados) => {
     await validaCliente(id);
 
     if (dados.email) {
-        await validateEmailAtualizacao(dados.email, id);
+        await validaEmail(dados.email, id);
     }
     return await clienteRepository.update(id, dados);
 };
